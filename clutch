@@ -1,0 +1,103 @@
+function APILoader(apiName, apiPastebin)
+        os.unloadAPI(apiName)
+        if fs.exists(apiName)
+        then
+                os.loadAPI(apiName)
+        else
+                shell.run("pastebin","get",apiPastebin,apiName)
+                os.loadAPI(apiName)
+        end
+end
+ 
+APILoader("commonFunctions","x5Ve1KSK")
+APILoader("gooey","KpJ8K6xm")
+
+local SideToUse
+
+args = {...}
+
+
+
+
+function SetOutput(OutputLevel)
+	term.clear()
+	gooey.writeAt(1,1,"Output (".. SideToUse .. ") set to " .. OutputLevel)
+	redstone.setAnalogOutput(SideToUse, tonumber(OutputLevel))
+	sleep(2)
+end
+
+function main()
+	if args[1] == nil
+	then
+		return "Must specify side for redstone output"
+	else
+		SideToUse = args[1]
+		print("Using " .. SideToUse .. " as outout side for redstone")
+		print("Enter to continue")
+		read()
+	end
+	continue = true
+	machines = commonFunctions.loadData("Machines")
+	if machines == nil 
+	then
+		print "No machines file found"
+		print "Enter to continue"
+		machines = {}
+		read()
+	end
+	
+	while continue do
+		 menuItems = {}
+		for k, v in pairs(machines) do
+			table.insert(menuItems,{["text"] = ("Enable " .. k) , ["func"] = SetOutput, ["params"] = {v}})
+		end
+		table.insert(menuItems,{["text"] = ("Add Machine") , ["func"] = AddNewMachine})
+		table.insert(menuItems,{["text"] = ("Remove Machine") , ["func"] = RemoveMachines})
+		table.insert(menuItems,{["text"] = ("Exit") , ["func"] = Exit})
+		if term.isColor()
+		then
+			gooey.clickMenu("Clutch Control",menuItems, term)
+		else
+			commonFunctions.menu(menuItems, "Clutch Control")
+		end
+	end
+	return "Program Complete"
+end
+
+function Exit()
+	continue = false
+end
+
+function AddNewMachine()
+	term.clear()
+	term.setCursorPos(1,1)
+	print("Enter Machine Name")
+	machName = read()
+	print("Enter redstone signal strength")
+	sigStr = read()
+	machines[machName] = sigStr
+	print ("Saving")
+	commonFunctions.saveData(machines,"Machines")
+end
+
+function RemoveMachines()
+	removeMenu = {}
+	for k,v in pairs(machines) do
+		table.insert(removeMenu,{["text"] = (k) , ["func"] = RemoveMachine, ["params"] = {k}})
+	end
+	table.insert(removeMenu,{["text"] = "Cancel" , ["func"] = term.clear})
+	if term.isColor()
+	then
+		gooey.clickMenu("Select Machine to Remove",removeMenu, term)
+	else
+		commonFunctions.menu(removeMenu,"Select Machine to Remove")
+	end
+end
+
+function RemoveMachine(machineName)
+	machines[machineName] = nil
+	print ("Saving")
+	commonFunctions.saveData(machines,"Machines")
+end
+
+print(main())
