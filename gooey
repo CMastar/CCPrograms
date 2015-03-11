@@ -1,0 +1,160 @@
+-- API for building a basic GUI on advanced monitors
+
+function drawBox(startX,startY,endX,endY,boxColour,display)
+    display = display or term
+    display.setBackgroundColour(boxColour)
+    for Y = startY, endY do
+        for X = startX, endX do
+            display.setCursorPos(X,Y)
+            display.write(" ")
+        end
+    end
+end
+
+function writeAt(X,Y,message,display)
+    display = display or term
+    display.setCursorPos(X,Y)
+    display.write(message)
+end
+
+function drawButton(startX,startY,endX,endY,message,boxColour,clickFunc,clickParams,display)
+
+    display = display or term
+    clickParams = clickParams or {}
+    display.setBackgroundColour(boxColour)
+    triggerZones = {}
+    for Y = startY, endY do
+        for X = startX, endX do
+            display.setCursorPos(X,Y)
+            display.write(" ")
+            triggerZones[X .. "," .. Y] = {["func"] = clickFunc,["params"] = clickParams}
+        end
+    end
+    writeAt(math.floor(startX + (endX - startX  - #message)/2),math.floor(startY + (endY-startY)/2),message,display)
+    return triggerZones
+
+end
+
+function drawImage(startX,startY,image,display)
+    display = display or term
+    for Y, line in pairs(image) do
+        for X, col in pairs(line) do
+            display.setBackgroundColour(col)
+            display.setCursorPos(X,Y)
+            display.write(" ")
+        end
+    end
+end
+
+function buttonHandler(triggerZones, monitor, time)
+	notPressed = true
+	while notPressed do
+		if monitor == nil or monitor == term then
+			event, button, xPos, yPos = os.pullEvent("mouse_click")
+		else
+			event, side, xPos, yPos = os.pullEvent("monitor_touch")
+		end
+		index = (xPos .. "," .. yPos)
+		if triggerZones[index] ~= nil
+		then
+			p = triggerZones[index].params
+			triggerZones[index].func(p[1],p[2],p[3],p[4],p[5],p[6])
+			notPressed = false
+		end
+	end
+end
+
+function clickMenu(menuTitle,menuItems, display)
+    display = display or term
+    w, h = display.getSize()
+    display.setTextColor(colours.black)
+    display.setBackgroundColor(colours.black)
+	display.clear()
+    drawBox(2,2,w - 7,2,colours.lightGrey,display)
+    writeAt(math.floor((w - #menuTitle)/2),2,menuTitle,display)
+    buttons = {}
+    for i = 1,#menuItems do
+        buttons = commonFunctions.combineTables(buttons,drawButton(2,i * 2 + 2,w - 7,i * 2 + 2,menuItems[i].text,colours.lightGrey,menuItems[i].func,menuItems[i].params,display))
+    end
+    buttonHandler(buttons,display)
+end
+
+--[[ function drawBar(horizontal, position, width, data, colour, backColour, display) -- Draws a bar as part of a bar chart right across the display
+	display = display or term
+	
+	-- these two bo
+	h, w = display.getSize()
+	WW = {}
+	Pos = {["X"] = 0, ["Y"] = 0}
+	if horizontal 
+	then
+		WW["along"] = "X"
+		WW["wide"] = "Y"
+		step = math.floor((w - 1) / 10)
+	else
+		WW["along"] = "X"
+		WW["wide"] = "Y"
+		step = math.floor((h - 1) / 10)
+	end
+	for Pos[WW.along] = 2,(10 * step) do
+		for Pos[WW.wide] = position, (position + width)
+		if step > 1 and (Pos[WW.along] % step) == 0 then
+			display.setBackgroundColor(backColour)
+		else
+			display.setBackgroundColor(colour)
+		end
+		if ((Pos[WW.along]/(step * 10)) * 100) > data.percentage
+		then
+			display.setCursorPos(Pos.X,Pos.Y)
+			display.write(" ")
+		end
+	end
+	if data.label ~= nil 
+	then
+		Pos[WW.along] = 1
+		for i = 1,width do
+			Pos[WW.wide] = position + (i - 1)
+			display.setCursorPos(Pos.X,Pos.Y)
+			display.write(data.label:sub(i,i))
+		end
+	end
+	if data.rawNumber ~= nil 
+	then
+		numberText = tostring(data.rawNumber)
+		if horizontal 
+		then
+			display.setCursorPos((position + width /2), ((w - numberText:len)/2))
+			display.write(numberText)
+		end
+	end
+end
+
+function barCharts(data, title, horizontal, display) -- data should be a table of the data for the bars, which should themselves be a table containing .percentage, .rawNumber (optional) and .label (optional)
+	
+	-- set stuff up
+	display = display or term
+	horizontal = horizontal or false
+	colourToUse = 1
+	background = colour.black
+	h, w = display.getSize()
+	if horizontal
+	then
+		width = math.floor(h / len(data))
+		pos = 2
+	else
+		width = math.floor(w / len(data))
+		pos = 1
+	end
+	
+	-- Get with the drawing
+	display.setBackgroundColor(background)
+	display.clear()
+	for i = 1,#data do
+		drawBar(horizontal, pos, width, data[i], colourToUse, background, display)
+		pos = pos + width
+		colourToUse = colourToUse * 2
+	end
+	display.setCursorPos((w - len(title))/2,1)
+	display.setBackgroundColor(background)
+	display.write(title)
+end ]]--

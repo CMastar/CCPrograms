@@ -1,0 +1,284 @@
+function pickTargets(targetList, targetWanted) -- given a list of targets, finds targets of the desired type from said list.
+	targets = {}
+	for k,v in pairs(targetList) do
+		if v.RawName == targetWanted
+		then
+			table.insert(targets,k)
+		end
+	end
+	return targets
+end
+
+function printInColumns(row) -- prints out a of data in equal sized columns. "row" must be a table of strings.
+	w,h  = term.getSize()
+	colSize = (w / (#row))
+	x, y = term.getCursorPos()
+	for i = 1,#row do
+		term.setCursorPos(((i - 1) * colSize + 1),y)
+		term.write(row[i])
+	end
+	print()
+end
+
+function validateTargets(targetList, sensorUsed, printResults) -- Checks that desired targets actually exist. If not, removes them from the returned list. Assumes target names (in OCS sens) are table key, anything in V is fluff to be passed through.
+	printResults = printResults or true
+	validTargetList = {}
+	for k,v in pairs(targetList) do
+		reading = sensorUsed.getTargetDetails(k)
+		if reading == nil
+		then
+			if printResults
+			then
+				print("Target at " .. k .. " does not exist. Removing.")
+			end
+		else
+			if printResults
+			then
+				print("Valid target found at " .. k)
+			end
+			validTargetList[k] = v
+		end
+	end
+	return validTargetList
+end
+
+function printPairs(tableToPrint) -- Ronseal
+	for k, v in pairs(tableToPrint) do
+		print(k .. " , " .. v)
+	end
+end
+
+function getPeripherals() -- Finds one of each connected peripheral. Adapted from the buggy version included with ccSensors.
+-- WARNING: Will only feed back the last discovered of each peripheral. Do not use this if you wish to use multiple monitors or sensors!
+	local dict = {sensor=nil,monitor=nil,modem=nil,pipe=nil,ITank=nil}
+	local sides = rs.getSides()
+	for i=1,#sides do
+		if peripheral.isPresent( sides[i] ) then
+			if peripheral.getType( sides[i])  == "SensorController" then
+				dict["sensor"]=sides[i]
+			elseif peripheral.getType( sides[i])  == "monitor" then
+				dict["monitor"]=sides[i]
+				term.redirect(peripheral.wrap(sides[i]))
+				print("Monitor found by getPeripherals")
+				term.restore()
+			elseif peripheral.getType( sides[i])  == "modem" then
+				dict["modem"]=sides[i]
+				rednet.open(sides[i])
+			elseif peripheral.getType( sides[i]) == "" then -- turns out this is a bug, and it should return something like "LogisticsPipes:Request" - depends on order of placing
+				dict["pipe"]=sides[i]
+				print("Pipe found by getPeripherals")
+			elseif peripheral.getType( sides[i]) == "rcirontankvalvetile" then
+				dict["ITank"]=sides[i]
+				print("Iron Tank found by getPeripherals")
+			else
+				dict[peripheral.getType( sides[i])] = sides[i]
+				-- guess this will find printers etc.
+			end
+		end
+	end
+	return dict
+end
+
+function findAllPeripherals(filter) -- Finds all networked or local peripherals whose type matches filter (if used). Returns a table of index side and value a wrapped peripheral
+	locs = peripheral.getNames()
+	periphs = {}
+	for k,v in pairs(locs) do
+		if filter ~= nil
+		then
+			if (peripheral.getType(v):find(filter)) ~= nil
+			then
+				periphs[v] = peripheral.wrap(v)
+			end
+		else
+			periphs[v] = peripheral.wrap(v)
+		end
+	end
+	return periphs
+end
+
+function pulseCable(side, colour) -- turns on the wires of a designated colour for 0.2 sec, then turns them off again. Note - assumes that said signals were low in the first place
+	initalState = rs.getBundledOutput(side) -- get the current cable state
+	rs.setBundledOutput(side, colours.combine(initalState, colour))
+	sleep(0.2)
+	rs.setBundledOutput(side, initalState)
+	sleep(0.2)
+end
+
+function cableOn(side, colour) -- turns on wires of designated colours
+	initalState = rs.getBundledOutput(side) -- get the current cable state
+	--print("inital colours:" .. initalState )
+	--print("requested colour: " .. colour)
+	newState = colours.combine(initalState, colour)
+	--print("new colours: " .. newState) 
+	rs.setBundledOutput(side, newState)
+	sleep(0.2)
+end
+
+function cableOff(side, colour) -- turn off a certain colour wire
+	initalState = rs.getBundledOutput(side) -- get the current cable state
+	rs.setBundledOutput(side, colours.subtract(initalState, colour))
+	sleep(0.2)
+end
+
+function cableCheck(side, colour) -- Is a certain colour wire on?
+	if colours.test(rs.getBundledInput(side), colour) then
+		return true
+	else
+		return false
+	end
+end
+
+function menu(menuItems, menuHeading) -- Runs a menu for the user to interact with. menuItems should be a table of all the objects in the menu, in top to bottom order. Returns index of selected menu item.
+	--ToDo - make this SCROLL
+	w, h = term.getSize()
+	selectedItem = 1
+	
+	firstItem = 1
+	if #menuItems < (h - 2)
+	then
+		lastItem = #menuItems
+		startLine = (h/2) - (#menuItems/2) - 1
+	else
+		lastItem = (h-2)
+		startLine = 1
+	end
+	while true do
+		term.clear()
+		if menuHeading ~= nil
+		then
+			term.setCursorPos((w/2)-(#menuHeading/2), startLine)
+			term.write(menuHeading)
+		end
+		j = 1
+		for i = firstItem, lastItem do  -- draw the menu in the middle
+			toWrite =  menuItems[i].text or menuItems[i]
+			if i == selectedItem -- If the current item is the selected one, make it obvious to the user
+			then
+				toWrite = "=" .. toWrite .. "="
+			end
+			term.setCursorPos((w/2)-((#toWrite + 2)/2), startLine + j)
+			term.write(toWrite)
+			j = j + 1
+		end
+		
+		event, result = os.pullEvent("key") -- wait here until a key is pressed
+		if result == 200 -- On "up" Go up one item if there are still items available
+		then
+			if selectedItem > 1 
+			then 
+				selectedItem = selectedItem - 1 
+				if selectedItem < firstItem -- scheck we haven't moved out of the current displayed range. If so, scroll.
+				then
+					firstItem = selectedItem
+					lastItem = lastItem - 1
+				end
+			end 
+		elseif result == 208 
+		then -- on "down" Go down one item if there are still items available
+			if selectedItem < #menuItems 
+			then 
+				selectedItem = selectedItem + 1 
+				if selectedItem > lastItem -- scheck we haven't moved out of the current displayed range. If so, scroll.
+				then
+					lastItem = selectedItem
+					firstItem = firstItem + 1
+				end
+			end
+		elseif result == 28 then -- on "enter" return that item number
+			if menuItems[selectedItem].func ~= nil -- if the menu is "functional" then call the function. Else don't)
+			then
+				p =  menuItems[selectedItem].params or {}
+				menuItems[selectedItem].func(p[1],p[2],p[3],p[4],p[5],p[6])
+			end
+			return selectedItem
+		end
+	end
+end
+
+function sideCheck(check) -- checks that a named side is a valid side
+	for k,v in pairs(redstone.getSides) do
+		if check == v
+		then
+			return true
+		end
+	end
+	return false
+end
+
+function findTargets(sensorUsed, targetTypes) -- given a sensor and a list of types to search for, will return a table of target locations for those matching
+	allTargets = sensorUsed.getTargets()
+	targets = {}
+	for k,v in pairs(allTargets) do
+		for l,u in pairs (targetTypes) do
+			if v.RawName == l
+			then
+				table.insert(targets,k)
+			end
+		end
+	end
+	return targets
+end
+
+function saveData(dataToSave, saveFileName, userResponse) -- saves any variable away in the specified location in serialized form.
+	userResponse = userResponse or true
+	print("")
+	term.write("Saving to " .. saveFileName)
+	fs.delete(saveFileName)
+	term.write("...")
+	targetFile = io.open(saveFileName, "w")
+	term.write("......")
+	targetFile:write(textutils.serialize(dataToSave))
+	term.write("......")
+	targetFile:close()
+	print("...Done")
+--	if userResponse
+--	then
+--		print("Enter to continue")
+--		read()
+--	end
+end
+
+function loadData(fileName) -- loads a requested serialized text file, returns the contents
+	if fs.exists(fileName)
+	then
+		targetFile = io.open(fileName)
+		data = textutils.unserialize(targetFile:read("*a"))
+		targetFile:close()
+
+	else
+		print("No ".. fileName .. " file exists")
+	end
+	return data
+end
+
+
+function combineTables(tab1,tab2)
+	newTab = {}
+	for k, v in pairs(tab1) do
+		newTab[k] = v
+	end
+	for k, v in pairs(tab2) do
+		newTab[k] = v
+	end
+	return newTab
+end
+
+function selectPeripheral(periphType) -- This function should move to common functions
+	periphs  = commonFunctions.findAllPeripherals(periphType) -- Scan for network attached and side attached peripherals of the given type
+	if periphs == nil -- Check that there are any periphs returned
+	then
+		print ("No linked " .. periphType .. "s detected")
+		return "none"
+	end
+	
+	-- Create the menu for the user to pick from
+	menuItems = {}
+	for k, v in pairs(periphs) do
+		table.insert(menuItems, k)
+	end
+	table.insert(menuItems, "none")
+	periphType = periphType or "peripheral"
+	heading = "Select " .. periphType .. "to Use:"
+	menuResult = commonFunctions.menu(menuItems, heading)
+	return menuItems[menuResult] -- return which peripheral was picked.
+end
