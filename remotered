@@ -24,7 +24,7 @@ function Main()
 	end
 	if not modemfound then return "No modem found - please attach one for this program to work" end
 	rednet.host("Redstone",settings["HostName"])
-	D= isplay()
+	Display()
 	while true do
 		id,message, protocol = rednet.receive("Redstone")
 		RSOutput(message)
@@ -61,13 +61,15 @@ end
 
 function Display(message)
 	term.clear()
-	term.setpos(1,1)
+	term.setCursorPos(1,1)
 	print("Name: " .. settings["HostName"])
 	for k,side in pairs(rs.getSides()) do
 		print (side .. ": " .. rs.getAnalogOutput(side))
 	end
 	print("Last updated at: " .. os.time())
-	print("Last Message was: " .. textutils.deserialize("Message") or tostring(message))
+	if message ~= nil then
+		print("Last Message was: " .. textutils.unserialize("Message") or tostring(message))
+	end
 end
 
 print(Main())
