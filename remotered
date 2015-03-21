@@ -35,8 +35,8 @@ end
 
 function DefaultSideMenu()
 	menuItems = {}
-	for k,v in pairs(rs.getSides())
-		table.insert(menuItems,{["text"] = v,["func"] = SetDefaultSide,["params"] = {v})
+	for k,v in pairs(rs.getSides()) do
+		table.insert(menuItems,{["text"] = v,["func"] = SetDefaultSide,["params"] = {v}})
 	end
 	commonfunctions.menu(menuItems, "Choose Default Output Side")
 end
