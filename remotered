@@ -24,11 +24,11 @@ function Main()
 	end
 	if not modemfound then return "No modem found - please attach one for this program to work" end
 	rednet.host("Redstone",settings["HostName"])
-	
+	D= isplay()
 	while true do
 		id,message, protocol = rednet.receive("Redstone")
 		RSOutput(message)
-		Display()
+		Display(message)
 	end
 	return "Got to the end somehow. Odd"
 end
@@ -38,7 +38,7 @@ function DefaultSideMenu()
 	for k,v in pairs(rs.getSides()) do
 		table.insert(menuItems,{["text"] = v,["func"] = SetDefaultSide,["params"] = {v}})
 	end
-	commonfunctions.menu(menuItems, "Choose Default Output Side")
+	commonFunctions.menu(menuItems, "Choose Default Output Side")
 end
 
 		
@@ -51,7 +51,7 @@ function RSOutput(RSTable)
 	if RSTable.Bundled then
 		redstone.setBundledOutput(RSTable.Side,RSTable.Value)
 	else
-		if isnumber(RSTable.Value) then
+		if tonumber(RSTable.Value) == nil then
 			redstone.setAnalogOutput(RSTable.Side,RSTable.Value)
 		else
 			redstone.setOutput(RSTable.Side,RSTable.Value)
@@ -59,7 +59,7 @@ function RSOutput(RSTable)
 	end
 end
 
-function Display()
+function Display(message)
 	term.clear()
 	term.setpos(1,1)
 	print("Name: " .. settings["HostName"])
@@ -67,6 +67,7 @@ function Display()
 		print (side .. ": " .. rs.getAnalogOutput(side))
 	end
 	print("Last updated at: " .. os.time())
+	print("Last Message was: " .. textutils.deserialize("Message") or tostring(message))
 end
 
 print(Main())
