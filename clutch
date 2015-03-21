@@ -22,7 +22,17 @@ args = {...}
 function SetOutput(OutputLevel)
 	term.clear()
 	gooey.writeAt(1,1,"Output (".. SideToUse .. ") set to " .. OutputLevel)
-	redstone.setAnalogOutput(SideToUse, tonumber(OutputLevel))
+	RealSide = false
+	for k, side in rs.getSides() do
+		if side = SideToUse then
+			RealSide = true
+		end
+	end
+	if RealSide then
+		redstone.setAnalogOutput(SideToUse, tonumber(OutputLevel))
+	else
+		rednet.send(rednet.lookup("Redstone",SideToUse),{["Value"] = tonumber(OutputLevel),["Side"] = args[2]},"Redstone")
+	end
 	sleep(2)
 end
 

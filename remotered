@@ -1,7 +1,9 @@
 os.loadAPI("commonFunctions")
 
 
--- A program for outputting redstone in response to network request
+-- A program for outputting redstone in response to network 
+-- Responds to an incoing rednet signal that should be the form of a table.
+-- Table can have elements - "Value" (required, can be a bool or number), "Bundled" (optional, set to true using a bundled output) and "Side" (optional, will use default side if not specified)
 
 function Main()
 	term.clear()
@@ -51,7 +53,7 @@ function RSOutput(RSTable)
 	if RSTable.Bundled then
 		redstone.setBundledOutput(RSTable.Side,RSTable.Value)
 	else
-		if tonumber(RSTable.Value) == nil then
+		if tonumber(RSTable.Value) ~= nil then
 			redstone.setAnalogOutput(RSTable.Side,RSTable.Value)
 		else
 			redstone.setOutput(RSTable.Side,RSTable.Value)
@@ -68,7 +70,7 @@ function Display(message)
 	end
 	print("Last updated at: " .. os.time())
 	if message ~= nil then
-		print("Last Message was: " .. textutils.unserialize("Message") or tostring(message))
+		print("Last Message was: " .. textutils.serialize(message))
 	end
 end
 
