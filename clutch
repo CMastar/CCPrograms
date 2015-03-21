@@ -23,8 +23,8 @@ function SetOutput(OutputLevel)
 	term.clear()
 	gooey.writeAt(1,1,"Output (".. SideToUse .. ") set to " .. OutputLevel)
 	RealSide = false
-	for k, side in rs.getSides() do
-		if side = SideToUse then
+	for k, side in pairs(rs.getSides()) do
+		if side == SideToUse then
 			RealSide = true
 		end
 	end
