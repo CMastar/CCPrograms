@@ -1,0 +1,72 @@
+os.loadAPI("commonFunctions")
+
+
+-- A program for outputting redstone in response to network request
+
+function Main()
+	term.clear()
+	term.setPos(1,1)
+	print("Loading Settings")
+	settings = commonFunctions.loadData("RRSettings")
+	if settings == nil then
+		settings = {}
+		print("Enter name for this output")
+		settings["HostName"] = read()
+		DefaultSideMenu()
+		commonFunctions.saveData(settings,"RRSettings")
+	end
+	modemFound = false
+	for i,side in pairs(peripheral.getNames()) do
+		if peripheral.getType(side) = "modem" then
+			modemfound = true
+			rednet.open(side)
+		end
+	end
+	if not modemfound then return "No modem found - please attach one for this program to work" end
+	rednet.host("Redstone",settings["HostName"])
+	
+	while true do
+		id,message, protocol = rednet.receive("Redstone")
+		RSOutput(message)
+		Display()
+	end
+	return "Got to the end somehow. Odd"
+end
+
+function DefaultSideMenu()
+	menuItems = {}
+	for k,v in pairs(rs.getSides())
+		table.insert(menuItems,{["text"] = v,["func"] = SetDefaultSide,["params"] = {v})
+	end
+	commonfunctions.menu(menuItems, "Choose Default Output Side")
+end
+
+		
+function SetDefaultSide(side)
+	settings["DefaultSide"] = side
+end
+
+function RSOutput(RSTable)
+	if RSTable.Side == nil then RSTable.Side = settings["DefaultSide"] end
+	if RSTable.Bundled then
+		redstone.setBundledOutput(RSTable.Side,RSTable.Value)
+	else
+		if isnumber(RSTable.Value) then
+			redstone.setAnalogOutput(RSTable.Side,RSTable.Value)
+		else
+			redstone.setOutput(RSTable.Side,RSTable.Value)
+		end
+	end
+end
+
+function Display()
+	term.clear()
+	term.setpos(1,1)
+	print("Name: " .. settings["HostName"])
+	for k,side in pairs(rs.getSides()) do
+		print (side .. ": " .. rs.getAnalogOutput(side))
+	end
+	print("Last updated at: " .. os.time())
+end
+
+print(Main())
