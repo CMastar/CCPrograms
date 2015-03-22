@@ -40,7 +40,7 @@ function main()
 		local modemFound = false
 		for i,side in pairs(peripheral.getNames()) do
 			if peripheral.getType(side) == "modem" then
-				modemfound = true
+				modemFound = true
 				rednet.open(side)
 			end
 		end
