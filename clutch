@@ -46,10 +46,17 @@ function main()
 			RealSide = true
 		end
 	end
-	if RealSide == false then
-		print("Enter networking side")
-		local input = read()
-		rednet.open(input)
+	if not RealSide then
+		local modemFound = false
+		for i,side in pairs(peripheral.getNames()) do
+			if peripheral.getType(side) == "modem" then
+				modemfound = true
+				rednet.open(side)
+			end
+		end
+		if not modemFound then
+			return "No modem found for contacting remote machine"
+		end
 	end
 	continue = true
 	machines = commonFunctions.loadData("Machines")
