@@ -22,18 +22,9 @@ args = {...}
 function SetOutput(OutputLevel)
 	term.clear()
 	gooey.writeAt(1,1,"Output (".. SideToUse .. ") set to " .. OutputLevel)
-	RealSide = false
-	for k, side in pairs(rs.getSides()) do
-		if side == SideToUse then
-			RealSide = true
-		end
-	end
 	if RealSide then
 		redstone.setAnalogOutput(SideToUse, tonumber(OutputLevel))
 	else
-		print("Enter networking side")
-		local input = read()
-		rednet.open(input)
 		rednet.send(rednet.lookup("Redstone",SideToUse),{["Value"] = tonumber(OutputLevel),["Side"] = args[2]},"Redstone")
 	end
 	sleep(2)
@@ -48,6 +39,17 @@ function main()
 		print("Using " .. SideToUse .. " as outout side for redstone")
 		print("Enter to continue")
 		read()
+	end
+	RealSide = false
+	for k, side in pairs(rs.getSides()) do
+		if side == SideToUse then
+			RealSide = true
+		end
+	end
+	if RealSide == false then
+		print("Enter networking side")
+		local input = read()
+		rednet.open(input)
 	end
 	continue = true
 	machines = commonFunctions.loadData("Machines")
