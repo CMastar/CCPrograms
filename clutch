@@ -31,7 +31,9 @@ function SetOutput(OutputLevel)
 	if RealSide then
 		redstone.setAnalogOutput(SideToUse, tonumber(OutputLevel))
 	else
-		rednet.open(SideToUse)
+		print("Enter networking side")
+		local input = read()
+		rednet.open(input)
 		rednet.send(rednet.lookup("Redstone",SideToUse),{["Value"] = tonumber(OutputLevel),["Side"] = args[2]},"Redstone")
 	end
 	sleep(2)
