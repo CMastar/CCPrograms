@@ -1,16 +1,5 @@
-function APILoader(apiName, apiPastebin)
-        os.unloadAPI(apiName)
-        if fs.exists(apiName)
-        then
-                os.loadAPI(apiName)
-        else
-                shell.run("pastebin","get",apiPastebin,apiName)
-                os.loadAPI(apiName)
-        end
-end
- 
-APILoader("commonFunctions","x5Ve1KSK")
-APILoader("gooey","KpJ8K6xm")
+os.loadAPI("commonFunctions")
+os.loadAPI("gooey")
 
 local SideToUse
 
@@ -27,6 +16,7 @@ function SetOutput(OutputLevel)
 	else
 		rednet.send(rednet.lookup("Redstone",SideToUse),{["Value"] = tonumber(OutputLevel),["Side"] = args[2]},"Redstone")
 	end
+	commonFunctions.saveData({OutputLevel},"LastOutput")
 	sleep(2)
 end
 
@@ -66,6 +56,11 @@ function main()
 		print "Enter to continue"
 		machines = {}
 		read()
+	end
+	
+	lastOutput = commonFunctions.loadData("LastOutput")
+	if lastOutput ~= nil then
+		SetOutput(lastOutput[1])
 	end
 	
 	while continue do
