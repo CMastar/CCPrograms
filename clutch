@@ -27,8 +27,6 @@ function main()
 	else
 		SideToUse = args[1]
 		print("Using " .. SideToUse .. " as outout side for redstone")
-		print("Enter to continue")
-		read()
 	end
 	RealSide = false
 	for k, side in pairs(rs.getSides()) do
@@ -59,7 +57,7 @@ function main()
 	end
 	
 	lastOutput = commonFunctions.loadData("LastOutput")
-	if lastOutput ~= nil then
+	if lastOutput[1] ~= nil then
 		SetOutput(lastOutput[1])
 	end
 	
