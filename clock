@@ -2,11 +2,11 @@ print("Pulsing Redstone")
 pulseLength = 1 -- In ticks
 clockSpeed = 20 -- In ticks
 while true do
-    while rs.getInput("right") do --  Enable the clock when supplying a signal
+    while rs.getInput("left") do --  Enable the clock when supplying a signal
         rs.setOutput("top", true)
         sleep(pulseLength / 20)
         rs.setOutput("top", false)
-        sleep((clockSpeed - pulseLength) / 20)
+        sleep(pulseLength / 20)
     end
     event = os.pullEvent("redstone")
 end
