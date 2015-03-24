@@ -4,9 +4,9 @@ clockSpeed = 20 -- In ticks
 while true do
     while rs.getInput("left") do --  Enable the clock when supplying a signal
         rs.setOutput("top", true)
-        sleep(pulseLength / 20)
+        sleep(pulseLength / 10)
         rs.setOutput("top", false)
-        sleep(pulseLength / 20)
+        sleep(pulseLength / 10)
     end
     event = os.pullEvent("redstone")
 end
