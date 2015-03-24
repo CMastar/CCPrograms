@@ -1,0 +1,229 @@
+xPos = 0 -- forward
+yPos = 0 -- right
+zPos = 0 -- up
+xInd = 1 -- x direction index
+yInd = 4 -- y direction index
+mods = {1,0,-1,0} -- for tracking direction/position effectivley
+upTheRow = true -- true is "up" the row, false is down.
+treesCut = 0 -- count of trees chopped down
+args = { ... }
+maxSafeHeight = 7
+
+local function print(message)
+	shell.run("/pb/remotePrint/print", message, 92, "right")
+end
+
+local function setHeight(targetZ) -- moves the turtle to the target height, bashing any obstructions clear
+	if targetZ > maxSafeHeight then
+		targetZ = maxSafeHeight
+	end
+	while zPos < targetZ do
+		if turtle.detectUp() then
+			turtle.digUp()
+		end
+		if turtle.up() then
+			zPos = zPos + 1
+		end
+	end
+	while zPos > targetZ do
+		if turtle.detectDown() then
+			turtle.digDown()
+		end
+		if turtle.down() then
+			zPos = zPos - 1
+		end
+	end	
+end
+
+local function moveForward(n)  -- moves the turtle forward n blocks, bashing any obstructions clear.
+	distance = n or 1
+	distanceMoved = 0
+	while distanceMoved < distance do
+		if turtle.detect() then
+			turtle.dig()
+		end
+		if turtle.forward() then -- record the position the turtle is at
+			distanceMoved = distanceMoved + 1
+			xPos = xPos + mods[xInd]
+			yPos = yPos + mods[yInd]
+		end
+	end
+end
+
+local function right() --turns right by 90 degrees
+	turtle.turnRight()
+	-- rest of the loop sets the direction mods correctly
+	if xInd < 4 then
+		xInd = xInd + 1
+	else
+		xInd = 1
+	end
+	if yInd < 4 then
+		yInd = yInd + 1
+	else
+		yInd = 1
+	end
+end
+
+local function left() -- turns left by 90 degrees
+	turtle.turnLeft()
+	if xInd > 1 then
+		xInd = xInd - 1
+	else
+		xInd = 4
+	end
+	if yInd > 1 then
+		yInd = yInd - 1
+	else
+		yInd = 4
+	end
+end
+
+local function harvestTree() -- Once a tree has been found, chops down the central trunk
+
+	setHeight(-1) --goes to the base of the tree
+	
+	while turtle.detect() do -- This loop works up the tree, digging as it goes
+		turtle.dig()
+		setHeight(zPos + 1)
+	end
+	setHeight(0) -- back to start level again
+	print("Chopped tree at (" .. xPos .. "," .. yPos .. ")")
+	treesCut = treesCut + 1
+end
+
+local function nextTree() -- moves to the next tree along
+	if upTheRow then -- if heading "forward" along the rows
+		if (xPos  == ((treeSpace + 1)) * treesX) then  -- is it the end of the row?
+			if (yPos  == ((treeSpace + 1)) * (treesY - 1)) then -- is it the end of the whole farm?
+				return true
+			else
+				moveForward()
+				right()
+				moveForward(treeSpace + 1)
+				right()
+				upTheRow = false
+			end
+		else
+			moveForward(treeSpace)
+		end
+	else
+		if (xPos  == ((treeSpace + 1)) * 1) then
+			if (yPos  == ((treeSpace + 1)) * (treesY - 1)) then
+				return true
+			else
+				moveForward()
+				left()
+				moveForward(treeSpace + 1)
+				left()
+				upTheRow = true
+			end
+		else
+			moveForward(treeSpace)
+		end
+	end
+	return false
+end
+
+local function saplingCheck()  -- checks if there is a block where there should be a sapling, plants one if not
+	if not turtle.detectDown() then
+		if turtle.getItemCount(1) > 1 then
+			turtle.select(1)
+			turtle.placeDown()
+			print("Planted sapling at (" .. xPos .. "," .. yPos .. ")")
+		else
+			print("Out of saplings!, please refill slot 1")
+		end
+	end
+end
+
+local function collectTrees()  -- Loops over the collecting trees process, assuming starting from the dock
+	moveForward(treeSpace)
+	local continue = true
+	while continue do
+		if turtle.detect() then -- is there a tree?
+			harvestTree()
+		end
+		moveForward()
+		saplingCheck() -- is there a spaling?
+		if nextTree() then  -- Move to the next tree, or tell us if it is the end of the farm
+			continue = false
+		end
+	end
+	print("Chopped down " .. treesCut .. " trees")
+end
+
+function returnToDock() -- routes back to the dock (xPos, zPos and and dumps slots 2-9
+	print("Returning to dock from (" .. xPos .. "," .. yPos .. ")")
+	moveForward()
+	setHeight(0)
+	while not (mods[yInd] == (-1)) do -- turn around so facing "left"
+		left()
+	end
+	while (yPos > 1) do -- go back to just before the first row of trees
+		moveForward()
+	end
+	left()
+	while (xPos > 1) do --almost back to the dock
+		moveForward()
+	end
+	right()
+	moveForward()
+	left()
+	moveForward()
+	right()
+	right()
+	for i = 2,9 do -- dump ALL THE THINGS
+		turtle.select(i)
+		if turtle.getItemCount(i) > 0 then
+			turtle.drop()
+		end
+	end
+end
+
+local function checkRednetConnection()
+	rednet.open("left")
+	print("Now receiving rednet commands on ID: "..os.computerID())
+end
+
+function mainLoop()
+	checkRednetConnection()
+	while true do
+		senderID, message = rednet.receive(5)
+		if senderID == nil or senderID == "" or message == nil then
+		elseif message ~= "start" then
+			print("Do not understand ["..message.."] try \"start\"")
+			rednet.send(senderID, "Do not understand ["..message.."] try \"start\"")
+		else
+			collectTrees()
+			returnToDock()
+		end
+	end
+	rednet.close("right")
+end
+
+--[[ commenting this out till I understand args 
+function argsCheck()
+	for i = 1,3 do
+		if not ((type(args[i])) == "number") then
+			print("Format is treefarm treesahead treesright treespacing")
+			return false
+		end
+	end
+	return true
+end
+
+if argsCheck then 
+	local treesX = args[1] -- number of trees ahead
+	local treesY = args[2] -- number of trees behind
+	local treeSpace = args[3] -- blocks of empty space between trees
+	mainLoop()
+end
+!!!EDIT: Looks like you have it except shouldn't this be "if argsCheck() then"?
+!!!However, not sure about if args[i] == "number", dunno how to check types. -Herrad
+]]--
+
+treesX = 7
+treesY = 7
+treeSpace = 3
+mainLoop()
