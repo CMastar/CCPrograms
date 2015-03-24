@@ -1,0 +1,91 @@
+-- Tree Farm mark 2 creation
+
+-- Standard Turtlefuncs
+
+print("This program does nothing, it is just a set of useful  functions to operate turtles off.")
+
+xPos = 0 -- Initalise positions. Positive x = forward from starting direction
+yPos = 0 -- Positive y = right from starting position
+zPos = 0 -- Positive z = up from starting position
+dir = 1  -- initalize direction 1 = ahead, 2 = right, 3 = back, 4 = left, relative to inital position
+xMods = {1,0,-1,0} -- index xMods[dir] indicates how x will change on a turtle.forward()
+yMods = {0,1,0,-1} --  index xMods[dir] indicates how x will change on a turtle.forward()
+
+
+local function setHeight(targetZ) -- moves the turtle to the target height, bashing any obstructions clear
+	while zPos < targetZ do
+		if turtle.detectUp() then
+			turtle.digUp()
+		end
+		if turtle.up() then
+			zPos = zPos + 1
+		end
+	end
+	while zPos > targetZ do
+		if turtle.detectDown() then
+			turtle.digDown()
+		end
+		if turtle.down() then
+			zPos = zPos - 1
+		end
+	end	
+end
+
+local function right() -- turns right once
+	turtle.turnRight()
+	dir = dir + 1
+	if dir > 4 then --makes sure dir is in the 1-4 range
+		dir = dir - 4
+	end
+end
+
+local function left() -- turns left once
+	turtle.turnLrft()
+	dir = dir - 1
+	if dir < 1 then --makes sure dir is in the 1-4 range
+		dir = dir + 4
+	end
+end
+
+
+local function turnTo(targetDir) -- turns right untl facing the right way (TODO: Find a way of making it turn the shortest way whish isn't just one long list of special cases)
+	while  targetDir ~= dir do
+		right()
+	end
+end
+
+local function forward(distance)  -- Simple go forward, smash anything in the way. (TODO: add a simple evasion routine)
+	local i = 0
+	while i < distance do
+		if turtle.detect() then --  is there anything in the way? Smash it then
+			turtle.dig()
+		end
+		if turtle.forward() then  -- go forward, count if you actually move
+			i = i + 1
+			xPos = xPos + xMods[dir]
+			yPos = yPos + yMods[dir]
+		end
+	end
+	-- print("At end of forward command, I am at ("..xPos..","..yPos..","..zPos..")") -- decomment this to see where the turtle thinks it is
+end
+
+local function navigateTo(targetX,targetY,targetZ)  -- navigates to a relative coordinate, smashing everything it it's way. USE WITH CAUTION
+	-- print("Moving to (" .. targetX ..","..targetY..","..targetZ..")")  -- decomment this to see where the turtle thinks it is going
+	if xPos < targetX then
+		turnTo(1)
+		forward(targetX - xPos)
+	end
+	if xPos > targetX then
+		turnTo(3)
+		forward(xPos - targetX)
+	end
+	if yPos < targetY then
+		turnTo(2)
+		forward(targetY - yPos)
+	end
+	if yPos > targetY then
+		turnTo(4)
+		forward(yPos - targetY)
+	end
+	setHeight(targetZ)
+end
