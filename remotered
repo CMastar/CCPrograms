@@ -1,0 +1,77 @@
+os.loadAPI("commonFunctions")
+
+
+-- A program for outputting redstone in response to network 
+-- Responds to an incoing rednet signal that should be the form of a table.
+-- Table can have elements - "Value" (required, can be a bool or number), "Bundled" (optional, set to true using a bundled output) and "Side" (optional, will use default side if not specified)
+
+function Main()
+	term.clear()
+	term.setCursorPos(1,1)
+	print("Loading Settings")
+	settings = commonFunctions.loadData("RRSettings")
+	if settings == nil then
+		settings = {}
+		print("Enter name for this output")
+		settings["HostName"] = read()
+		DefaultSideMenu()
+		commonFunctions.saveData(settings,"RRSettings")
+	end
+	modemFound = false
+	for i,side in pairs(peripheral.getNames()) do
+		if peripheral.getType(side) == "modem" then
+			modemfound = true
+			rednet.open(side)
+		end
+	end
+	if not modemfound then return "No modem found - please attach one for this program to work" end
+	rednet.host("Redstone",settings["HostName"])
+	Display()
+	while true do
+		id,message, protocol = rednet.receive("Redstone")
+		RSOutput(message)
+		Display(message)
+	end
+	return "Got to the end somehow. Odd"
+end
+
+function DefaultSideMenu()
+	menuItems = {}
+	for k,v in pairs(rs.getSides()) do
+		table.insert(menuItems,{["text"] = v,["func"] = SetDefaultSide,["params"] = {v}})
+	end
+	commonFunctions.menu(menuItems, "Choose Default Output Side")
+end
+
+		
+function SetDefaultSide(side)
+	settings["DefaultSide"] = side
+end
+
+function RSOutput(RSTable)
+	if RSTable.Side == nil then RSTable.Side = settings["DefaultSide"] end
+	if RSTable.Bundled then
+		redstone.setBundledOutput(RSTable.Side,RSTable.Value)
+	else
+		if tonumber(RSTable.Value) ~= nil then
+			redstone.setAnalogOutput(RSTable.Side,RSTable.Value)
+		else
+			redstone.setOutput(RSTable.Side,RSTable.Value)
+		end
+	end
+end
+
+function Display(message)
+	term.clear()
+	term.setCursorPos(1,1)
+	print("Name: " .. settings["HostName"])
+	for k,side in pairs(rs.getSides()) do
+		print (side .. ": " .. rs.getAnalogOutput(side))
+	end
+	print("Last updated at: " .. os.time())
+	if message ~= nil then
+		print("Last Message was: " .. textutils.serialize(message))
+	end
+end
+
+print(Main())

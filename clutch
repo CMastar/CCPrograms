@@ -1,16 +1,5 @@
-function APILoader(apiName, apiPastebin)
-        os.unloadAPI(apiName)
-        if fs.exists(apiName)
-        then
-                os.loadAPI(apiName)
-        else
-                shell.run("pastebin","get",apiPastebin,apiName)
-                os.loadAPI(apiName)
-        end
-end
- 
-APILoader("commonFunctions","x5Ve1KSK")
-APILoader("gooey","KpJ8K6xm")
+os.loadAPI("commonFunctions")
+os.loadAPI("gooey")
 
 local SideToUse
 
@@ -22,7 +11,12 @@ args = {...}
 function SetOutput(OutputLevel)
 	term.clear()
 	gooey.writeAt(1,1,"Output (".. SideToUse .. ") set to " .. OutputLevel)
-	redstone.setAnalogOutput(SideToUse, tonumber(OutputLevel))
+	if RealSide then
+		redstone.setAnalogOutput(SideToUse, tonumber(OutputLevel))
+	else
+		rednet.send(rednet.lookup("Redstone",SideToUse),{["Value"] = tonumber(OutputLevel),["Side"] = args[2]},"Redstone")
+	end
+	commonFunctions.saveData({OutputLevel},"LastOutput")
 	sleep(2)
 end
 
@@ -33,8 +27,24 @@ function main()
 	else
 		SideToUse = args[1]
 		print("Using " .. SideToUse .. " as outout side for redstone")
-		print("Enter to continue")
-		read()
+	end
+	RealSide = false
+	for k, side in pairs(rs.getSides()) do
+		if side == SideToUse then
+			RealSide = true
+		end
+	end
+	if not RealSide then
+		local modemFound = false
+		for i,side in pairs(peripheral.getNames()) do
+			if peripheral.getType(side) == "modem" then
+				modemFound = true
+				rednet.open(side)
+			end
+		end
+		if not modemFound then
+			return "No modem found for contacting remote machine"
+		end
 	end
 	continue = true
 	machines = commonFunctions.loadData("Machines")
@@ -44,6 +54,11 @@ function main()
 		print "Enter to continue"
 		machines = {}
 		read()
+	end
+	
+	lastOutput = commonFunctions.loadData("LastOutput")
+	if lastOutput[1] ~= nil then
+		SetOutput(lastOutput[1])
 	end
 	
 	while continue do
