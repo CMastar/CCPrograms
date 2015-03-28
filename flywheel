@@ -1,7 +1,7 @@
 flywheel=peripheral.wrap("top")
 power, torque, speed =flywheel.getPower()
 
-while speed <256 then
+while speed <256 then do
 	rs.setOutput("back",false)
 	else
 	rs.setOutput("back",true)
