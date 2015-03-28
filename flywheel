@@ -7,10 +7,12 @@ power, torque, speed =flywheel.getPower()
 			term.clear()
 			print("Flywheel is spinning up, just a moment")
 			sleep(5)
+			end
 		else do
 			rs.setOutput("back",true)
 			term.clear()
 			print("Flywheel is outputting power")
 			sleep(5)
+			end
 		end
 	end
