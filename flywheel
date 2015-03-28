@@ -2,15 +2,17 @@
 flywheel=peripheral.wrap("top")
 power, torque, speed =flywheel.getPower()
 	while true do
-		if speed<256 then do
+		if speed<256 then
 			rs.setOutput("back",false)
 			term.clear()
 			print("Flywheel is spinning up, just a moment")
-			end
-		else do
+			
+		else
 			rs.setOutput("back",true)
 			term.clear()
 			print("Flywheel is outputting power")
-			end
+			
 		end
 	end
+	
+	
