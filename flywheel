@@ -13,6 +13,7 @@ power, torque, speed =flywheel.getPower()
 			print("Flywheel is outputting power")
 			
 		end
+		sleep(5)
 	end
 	
 	
