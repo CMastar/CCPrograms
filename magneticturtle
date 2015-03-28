@@ -1,0 +1,11 @@
+while true do
+	turtle.suckUp()
+	turtle.drop()
+	turtle.turnRight()
+	turtle.turnRight()
+	turtle.suck()
+	turtle.dropUp()
+	turtle.turnRight()
+	turtle.turnRight()
+	sleep(600)
+end
