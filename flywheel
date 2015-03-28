@@ -14,4 +14,3 @@ spoolspeed=speed<256
 		print("Flywheel is outputting power")
 		sleep(5)
 	end
-end
