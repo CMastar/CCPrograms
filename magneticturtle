@@ -1,11 +1,7 @@
 while true do
 	turtle.suckUp(1)
 	turtle.drop(1)
-	turtle.turnRight()
-	turtle.turnRight()
 	turtle.suck(1)
 	turtle.dropUp(1)
-	turtle.turnRight()
-	turtle.turnRight()
-	sleep(3600)
+	sleep(600)
 end
