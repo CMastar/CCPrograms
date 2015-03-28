@@ -56,15 +56,10 @@ function main()
 		read()
 	end
 	
-	lastOutput = commonFunctions.loadData("LastOutput")
-	if lastOutput[1] ~= nil then
-		SetOutput(lastOutput[1])
-	else
-		print "No machines file found"
-		print "Enter to continue"
-		lastOutput[1] = {}
-		read()
-	end
+	--lastOutput = commonFunctions.loadData("LastOutput")
+	--if lastOutput[1] ~= nil then
+	--	SetOutput(lastOutput[1])
+	--end
 	
 	while continue do
 		 menuItems = {}
