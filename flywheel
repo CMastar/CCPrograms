@@ -1,4 +1,4 @@
-function main()
+
 flywheel=peripheral.wrap("top")
 power, torque, speed =flywheel.getPower()
 spoolspeed=speed<256
