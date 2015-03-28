@@ -7,5 +7,5 @@ while true do
 	turtle.dropUp(1)
 	turtle.turnRight()
 	turtle.turnRight()
-	sleep(600)
+	sleep(3600)
 end
