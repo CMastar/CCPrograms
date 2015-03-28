@@ -1,0 +1,58 @@
+function APILoader(apiName, apiPastebin)
+        os.unloadAPI(apiName)
+        if fs.exists(apiName)
+        then
+                os.loadAPI(apiName)
+        else
+                shell.run("pastebin","get",apiPastebin,apiName)
+                os.loadAPI(apiName)
+        end
+end
+ 
+APILoader("commonFunctions","x5Ve1KSK")
+
+os.unloadAPI("sensor")
+os.loadAPI("/ocs/apis/sensor")
+ 
+ 
+function main()
+        periphs = commonFunctions.getPeripherals()
+        if periphs["sensor"] == nil -- check for a sensor and that it has the right card
+        then
+            return("No sensor found!")
+        else
+                        sens = sensor.wrap(periphs["sensor"])
+                        if sens.getSensorName() == "proximityCard"
+                        then
+                                print("Found a proximity sensor on the " .. periphs["sensor"] .. " and wrapped it")
+                        else
+                                return("Sensor card is not a proximity sensor")
+                        end
+        end
+        if periphs["monitor"] ~= nil
+        then
+                mon = peripheral.wrap(periphs["monitor"])
+        end
+        readLoop()
+        return("End of program reached")
+end
+
+function findPlayer(targets)
+	for k, v in pairs(targets) do
+		if v.Name == "Player"
+		then return false end
+	end
+	return true
+end
+
+function readLoop()
+        continue = true
+        while continue do
+                targs = sens.getTargets()
+                regionData = {}
+                redstone.setOutput("back",findPlayer(targs))
+                sleep(1)
+        end
+end
+
+print(main())
