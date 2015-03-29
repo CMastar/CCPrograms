@@ -27,6 +27,7 @@ end
 function main()
 	settings = commonFunctions.loadData("doorSettings")
 	if settings == nil then
+		settings = {}
 		local menuItems = {}
 		for k,v in pairs(rs.getSides()) do
 			table.insert(menuItems,{["func"] = SetRedstoneSide,["params"] = {v},["text"] = v})
