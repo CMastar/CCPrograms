@@ -12,7 +12,9 @@ local continue = true
 function AddDevice(device)
 	term.clear()
 	gooey.writeAt(1,1,"Enter a name for this " .. device.getName())
-	devName = read
+	print()
+	devName = read()
+	print(devName)
 	Devices[devName] = device
 end
 
