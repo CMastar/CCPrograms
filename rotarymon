@@ -11,12 +11,12 @@ local continue = true
 
 function AddDevice(deviceSide)
 	term.clear()
-	gooey.writeAt(1,1,"Enter a name for this " .. peripheral.call(v,"getName"))
+	gooey.writeAt(1,1,"Enter a name for this " .. peripheral.call(deviceSide,"getName"))
 	print()
 	devName = read()
 	print(devName)
 	Devices[devName] = peripheral.wrap(deviceSide)
-	commonFunctions.saveData(Devices,"rotaryMonitors")
+	--commonFunctions.saveData(Devices,"rotaryMonitors")
 end
 
 function PickDevice()
@@ -38,16 +38,16 @@ end
 function Display()
 	while continue do
 		if not InMenu then
-			height, width = mon.getSize()
+			width, height = mon.getSize()
 			items = 0
 			linesNeeded = 4
 			if Devices ~= nil then
 				for name,rotaryItem in pairs(Devices) do
-					gooey.writeAt(1,items * linesneeded + 1,name .. " a " .. rotaryItem.getName() .. " at " .. rotaryItem.getCoords())
+					gooey.writeAt(1,items * linesNeeded + 1,name .. " a " .. rotaryItem.getName() .. " at " .. rotaryItem.getCoords())
 					power, speed, torque = rotaryItem.getPower()
-					gooey.writeAt(1,items * linesneeded + 2,"Power: " .. power .. "W")
-					gooey.writeAt(1,items * linesneeded + 3,"Speed: " .. speed .. "rpm")
-					gooey.writeAt(1,items * linesneeded + 4,"Torque: " .. torque .. "Nm")
+					gooey.writeAt(1,items * linesNeeded + 2,"Power: " .. power .. "W")
+					gooey.writeAt(1,items * linesNeeded + 3,"Speed: " .. speed .. "rpm")
+					gooey.writeAt(1,items * linesNeeded + 4,"Torque: " .. torque .. "Nm")
 					items = items + 1
 				end
 			end
