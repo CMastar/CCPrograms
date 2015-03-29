@@ -244,7 +244,6 @@ function loadData(fileName) -- loads a requested serialized text file, returns t
 		targetFile = io.open(fileName)
 		data = textutils.unserialize(targetFile:read("*a"))
 		targetFile:close()
-
 	else
 		print("No ".. fileName .. " file exists")
 	end
