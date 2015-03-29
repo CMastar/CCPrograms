@@ -3,7 +3,7 @@ os.loadAPI("gooey")
 
 --This program is just for monitoring the status of rotarycraft devices.
 
-local Devices
+local Devices = {}
 local UpdateRate = 5
 local mon = term
 local InMenu = false
