@@ -7,6 +7,7 @@ local Devices
 local UpdateRate = 5
 local mon = term
 local InMenu = false
+local continue = true
 
 function AddDevice(device)
 	term.clear()
@@ -25,7 +26,7 @@ function PickDevice()
 		end
 	end
 	if term.isColor() then
-		gooey.menu("Pick a device to monitor",menuItems)
+		gooey.clickMenu("Pick a device to monitor",menuItems)
 	else
 		commonFunctions.menu(menuItems, "Pick a device to monitor")
 	end
@@ -37,15 +38,16 @@ function Display()
 			height, width = mon.getSize()
 			items = 0
 			linesNeeded = 4
-			for name,rotaryItem in pairs(Devices) do
-				gooey.writeAt(1,items * linesneeded + 1,name .. " a " .. rotaryItem.getName() .. " at " .. rotaryItem.getCoords())
-				power, speed, torque = rotaryItem.getPower()
-				gooey.writeAt(1,items * linesneeded + 2,"Power: " .. power .. "W")
-				gooey.writeAt(1,items * linesneeded + 3,"Speed: " .. speed .. "rpm")
-				gooey.writeAt(1,items * linesneeded + 4,"Torque: " .. torque .. "Nm")
-				items = items + 1
+			if Devices ~= nil then
+				for name,rotaryItem in pairs(Devices) do
+					gooey.writeAt(1,items * linesneeded + 1,name .. " a " .. rotaryItem.getName() .. " at " .. rotaryItem.getCoords())
+					power, speed, torque = rotaryItem.getPower()
+					gooey.writeAt(1,items * linesneeded + 2,"Power: " .. power .. "W")
+					gooey.writeAt(1,items * linesneeded + 3,"Speed: " .. speed .. "rpm")
+					gooey.writeAt(1,items * linesneeded + 4,"Torque: " .. torque .. "Nm")
+					items = items + 1
+				end
 			end
-
 			if mon == term then
 				gooey.writeAt(1,height,"Press enter to bring up menu")
 			end
@@ -60,13 +62,14 @@ function UserInterface()
 			read()
 		end
 		
-		InMenu = True
+		InMenu = true
 		local menuItems = {{["text"] = "Add machine to monitor", ["func"] = PickDevice}}
 		if term.isColor() then
-			gooey.menu("Main Menu",menuItems)
+			gooey.clickMenu("Main Menu",menuItems)
 		else
 			commonFunctions.menu(menuItems,"Main Menu")
 		end
+		InMenu = false
 	end 
 end
 
