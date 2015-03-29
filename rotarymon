@@ -3,7 +3,7 @@ os.loadAPI("gooey")
 
 --This program is just for monitoring the status of rotarycraft devices.
 
-local Devices = {}
+local Devices
 local UpdateRate = 5
 local mon = term
 local InMenu = false
@@ -16,6 +16,7 @@ function AddDevice(deviceSide)
 	devName = read()
 	print(devName)
 	Devices[devName] = peripheral.wrap(deviceSide)
+	commonFunctions.saveData(Devices,"rotaryMonitors")
 end
 
 function PickDevice()
@@ -84,6 +85,7 @@ function RemoveDevice()
 end
 
 function Main()
+	Devices = commonFunctions.loadData("rotaryMonitors") or {}
 	parallel.waitForAny(Display, UserInterface)
 	return "Program Ended"
 end
