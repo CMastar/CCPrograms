@@ -1,0 +1,85 @@
+os.loadAPI("commonFunctions")
+os.loadAPI("gooey")
+
+--This program is just for monitoring the status of rotarycraft devices.
+
+local Devices
+local UpdateRate = 5
+local mon = term
+local InMenu = false
+
+function AddDevice(device)
+	term.clear()
+	gooey.writeAt(1,1,"Enter a name for this " .. device.getName())
+	devName = read
+	Devices[devName] = device
+end
+
+function PickDevice()
+	periphs = peripheral.getNames()
+	menuItems = {}
+	for k,v in pairs(periphs) do
+		periphFound = peripheral.wrap(v)
+		if periphFound["getPower"] ~= nil then
+			table.insert(menuItems,{["func"] = AddDevice, ["text"] = periphFound.getName() .. " at " .. periphFound.getCoords(),["params"] = {periphFound}})
+		end
+	end
+	if term.isColor() then
+		gooey.menu("Pick a device to monitor",menuItems)
+	else
+		commonFunctions.menu(menuItems, "Pick a device to monitor")
+	end
+end
+
+function Display()
+	while continue do
+		if not InMenu then
+			height, width = mon.getSize()
+			items = 0
+			linesNeeded = 4
+			for name,rotaryItem in pairs(Devices) do
+				gooey.writeAt(1,items * linesneeded + 1,name .. " a " .. rotaryItem.getName() .. " at " .. rotaryItem.getCoords())
+				power, speed, torque = rotaryItem.getPower()
+				gooey.writeAt(1,items * linesneeded + 2,"Power: " .. power .. "W")
+				gooey.writeAt(1,items * linesneeded + 3,"Speed: " .. speed .. "rpm")
+				gooey.writeAt(1,items * linesneeded + 4,"Torque: " .. torque .. "Nm")
+				items = items + 1
+			end
+
+			if mon == term then
+				gooey.writeAt(1,height,"Press enter to bring up menu")
+			end
+		end
+		sleep(UpdateRate)
+	end
+end
+
+function UserInterface()
+	while continue do
+		if mon == term then -- If we're on the same screen as the info, then let the display loop look after itself
+			read()
+		end
+		
+		InMenu = True
+		local menuItems = {{["text"] = "Add machine to monitor", ["func"] = PickDevice}}
+		if term.isColor() then
+			gooey.menu("Main Menu",menuItems)
+		else
+			commonFunctions.menu(menuItems,"Main Menu")
+		end
+	end 
+end
+
+function SelectDisplay()
+	--to be implemented
+end
+
+function RemoveDevice()
+	--to be implemented
+end
+
+function Main()
+	parallel.waitForAny(Display, UserInterface)
+	return "Program Ended"
+end
+
