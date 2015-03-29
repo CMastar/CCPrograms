@@ -14,15 +14,14 @@ APILoader("commonFunctions","x5Ve1KSK")
 os.unloadAPI("sensor")
 os.loadAPI("/ocs/apis/sensor")
 
-local RSSide
-local RSState
+
 
 function SetRedstoneSide(side)
-	RSSide = side
+	settings.RSSide = side
 end
 
 function SetRedstoneState(state)
-	RSState = state
+	settings.RSState = state
 end
  
 function main()
@@ -35,6 +34,7 @@ function main()
 		commonFunctions.menu(menuItems,"Select redstone output side")
 		menuItems = {{["func"] = SetRedstoneState,["params"] = {true},["text"] = "On"},{["func"] = SetRedstoneState,["params"] = {false},["text"] = "Off"}}
 		commonFunctions.menu(menuItems,"What state should the redstone be when a player is detected")
+		commonFunctions.saveData(settings,"doorSettings")
 	end
 	periphs = commonFunctions.getPeripherals()
 	if periphs["sensor"] == nil -- check for a sensor and that it has the right card
@@ -60,9 +60,9 @@ end
 function findPlayer(targets)
 	for k, v in pairs(targets) do
 		if v.Name == "Player"
-		then return RSState end
+		then return settings.RSState end
 	end
-	return (not RSState)
+	return (not settings.RSState)
 end
 
 function readLoop()
@@ -70,7 +70,7 @@ function readLoop()
 	while continue do
 		targs = sens.getTargets()
 		regionData = {}
-		redstone.setOutput(RSSide,findPlayer(targs))
+		redstone.setOutput(settings.RSSide,findPlayer(targs))
 		sleep(1)
 	end
 end
