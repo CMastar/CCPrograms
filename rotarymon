@@ -9,13 +9,13 @@ local mon = term
 local InMenu = false
 local continue = true
 
-function AddDevice(device)
+function AddDevice(deviceSide)
 	term.clear()
-	gooey.writeAt(1,1,"Enter a name for this " .. device.getName())
+	gooey.writeAt(1,1,"Enter a name for this " .. peripheral.call(v,"getName"))
 	print()
 	devName = read()
 	print(devName)
-	Devices[devName] = device
+	Devices[devName] = peripheral.wrap(deviceSide)
 end
 
 function PickDevice()
@@ -24,7 +24,7 @@ function PickDevice()
 	for k,v in pairs(periphs) do
 		periphFound = peripheral.wrap(v)
 		if periphFound["getPower"] ~= nil then
-			table.insert(menuItems,{["func"] = AddDevice, ["text"] = periphFound.getName() .. " at " .. periphFound.getCoords(),["params"] = {periphFound}})
+			table.insert(menuItems,{["func"] = AddDevice, ["text"] = periphFound.getName() .. " at " .. periphFound.getCoords(),["params"] = {v}})
 		end
 	end
 	if term.isColor() then
