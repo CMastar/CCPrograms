@@ -3,11 +3,11 @@ os.loadAPI("gooey")
 
 --This program is just for monitoring the status of rotarycraft devices.
 
-local Devices
-local DeviceSides
-local mon = term
-local InMenu = false
-local continue = true
+Devices
+DeviceSides
+mon = term
+InMenu = false
+continue = true
 
 function AddDevice(deviceSide, devName)
 	-- Add a device (given that the side is already specified
@@ -103,6 +103,7 @@ function SelectDisplay()
 end
 
 function SetDisplay(displaySide)
+	print(displaySide .. " is the display side")
 	if displaySide == "term" then
 		mon = term
 	else
