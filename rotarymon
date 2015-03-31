@@ -137,7 +137,7 @@ end
 
 function Main()
 	LoadMonitors()
-	settings = commonFuntions.loadData("RotMonSettings")
+	settings = commonFunctions.loadData("RotMonSettings")
 	if settings == nil then
 		settings["display"] = "term"
 		settings["updateRate"] = 5
