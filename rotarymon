@@ -4,6 +4,7 @@ os.loadAPI("gooey")
 --This program is just for monitoring the status of rotarycraft devices.
 
 local Devices
+local DeviceSides
 local UpdateRate = 5
 local mon = term
 local InMenu = false
@@ -16,6 +17,7 @@ function AddDevice(deviceSide)
 	devName = read()
 	print(devName)
 	Devices[devName] = peripheral.wrap(deviceSide)
+	DeviceSides[devName] = deviceSide
 	--commonFunctions.saveData(Devices,"rotaryMonitors")
 end
 
@@ -36,44 +38,40 @@ function PickDevice()
 end
 
 function Display()
-	while continue do
-		if not InMenu then
-			width, height = mon.getSize()
-			items = 0
-			linesNeeded = 4
-			if Devices ~= nil then
-				for name,rotaryItem in pairs(Devices) do
-					gooey.writeAt(1,items * linesNeeded + 1,name .. " a " .. rotaryItem.getName() .. " at " .. rotaryItem.getCoords())
-					power, speed, torque = rotaryItem.getPower()
-					gooey.writeAt(1,items * linesNeeded + 2,"Power: " .. power .. "W")
-					gooey.writeAt(1,items * linesNeeded + 3,"Speed: " .. speed .. "rpm")
-					gooey.writeAt(1,items * linesNeeded + 4,"Torque: " .. torque .. "Nm")
-					items = items + 1
-				end
-			end
-			if mon == term then
-				gooey.writeAt(1,height,"Press enter to bring up menu")
-			end
+	width, height = mon.getSize()
+	items = 0
+	linesNeeded = 4
+	if Devices ~= nil then
+		for name,rotaryItem in pairs(Devices) do
+			gooey.writeAt(1,items * linesNeeded + 1,name .. " a " .. rotaryItem.getName() .. " at " .. rotaryItem.getCoords())
+			power, speed, torque = rotaryItem.getPower()
+			gooey.writeAt(1,items * linesNeeded + 2,"Power: " .. power .. "W")
+			gooey.writeAt(1,items * linesNeeded + 3,"Speed: " .. speed .. "rpm")
+			gooey.writeAt(1,items * linesNeeded + 4,"Torque: " .. torque .. "Nm")
+			items = items + 1
 		end
-		sleep(UpdateRate)
+	end
+	if mon == term then
+		gooey.writeAt(1,height,"Press enter to bring up menu")
+	end
+	while InMenu do
+		sleep(0.2)
 	end
 end
 
 function UserInterface()
-	while continue do
-		if mon == term then -- If we're on the same screen as the info, then let the display loop look after itself
-			read()
-		end
-		
-		InMenu = true
-		local menuItems = {{["text"] = "Add machine to monitor", ["func"] = PickDevice}}
-		if term.isColor() then
-			gooey.clickMenu("Main Menu",menuItems)
-		else
-			commonFunctions.menu(menuItems,"Main Menu")
-		end
-		InMenu = false
-	end 
+	if mon == term then -- If we're on the same screen as the info, then let the display loop look after itself
+		read()
+	end
+	
+	InMenu = true
+	local menuItems = {{["text"] = "Add machine to monitor", ["func"] = PickDevice}}
+	if term.isColor() then
+		gooey.clickMenu("Main Menu",menuItems)
+	else
+		commonFunctions.menu(menuItems,"Main Menu")
+	end
+	InMenu = false
 end
 
 function SelectDisplay()
@@ -85,9 +83,23 @@ function RemoveDevice()
 end
 
 function Main()
-	Devices = commonFunctions.loadData("rotaryMonitors") or {}
-	parallel.waitForAny(Display, UserInterface)
+	LoadMonitors
+	while continue do
+		parallel.waitForAny(Display, UserInterface)
+	end
 	return "Program Ended"
+end
+
+
+
+function LoadMonitors()
+	DeviceSides = commonFunctions.loadData("RotaryMonitors")
+	Devices = {}
+	if DeviceSides ~= nil then
+		for devName, side in pairs(DeviceSides) do
+			Devices[devName] = peripheral.wrap(side)
+		end
+	end
 end
 
 print(Main())
