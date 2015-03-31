@@ -51,15 +51,15 @@ function Display()
 	width, height = mon.getSize()
 	items = 0
 	linesNeeded = 4
-	if not (Settings["display"] == term and InMenu) then
+	if not (mon == term and InMenu) then
 		if Devices ~= nil then
 			for name,rotaryItem in pairs(Devices) do
 				x, y, z = rotaryItem.getCoords()
-				gooey.writeAt(1,items * linesNeeded + 1,name .. " a " .. rotaryItem.getName() .. " at " .. x .. "," .. y .. "," .. z,Settings["display"])
+				gooey.writeAt(1,items * linesNeeded + 1,name .. " a " .. rotaryItem.getName() .. " at " .. x .. "," .. y .. "," .. z,mon)
 				power, torque, speed = rotaryItem.getPower()
-				gooey.writeAt(1,items * linesNeeded + 2,"Power: " .. power .. "W",Settings["display"])
-				gooey.writeAt(1,items * linesNeeded + 3,"Speed: " .. speed .. "rpm",Settings["display"])
-				gooey.writeAt(1,items * linesNeeded + 4,"Torque: " .. torque .. "Nm",Settings["display"])
+				gooey.writeAt(1,items * linesNeeded + 2,"Power: " .. power .. "W",mon)
+				gooey.writeAt(1,items * linesNeeded + 3,"Speed: " .. speed .. "rpm",mon)
+				gooey.writeAt(1,items * linesNeeded + 4,"Torque: " .. torque .. "Nm",mon)
 				items = items + 1
 			end
 		end
