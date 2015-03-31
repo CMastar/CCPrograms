@@ -3,8 +3,7 @@ os.loadAPI("gooey")
 
 --This program is just for monitoring the status of rotarycraft devices.
 
-Devices
-DeviceSides
+
 mon = term
 InMenu = false
 continue = true
@@ -140,6 +139,7 @@ function Main()
 	LoadMonitors()
 	Settings = commonFunctions.loadData("RotMonSettings")
 	if Settings == nil then
+		print("Creating default settings")
 		Settings = {}
 		Settings["display"] = "term"
 		Settings["updateRate"] = 5
