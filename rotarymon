@@ -51,6 +51,7 @@ function Display()
 	items = 0
 	linesNeeded = 4
 	if not (mon == term and InMenu) then
+		mon.clear()
 		if Devices ~= nil then
 			for name,rotaryItem in pairs(Devices) do
 				x, y, z = rotaryItem.getCoords()
