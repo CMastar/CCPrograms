@@ -137,12 +137,13 @@ end
 
 function Main()
 	LoadMonitors()
-	settings = commonFunctions.loadData("RotMonSettings")
-	if settings == nil then
-		settings["display"] = "term"
-		settings["updateRate"] = 5
+	Settings = commonFunctions.loadData("RotMonSettings")
+	if Settings == nil then
+		Settings = {}
+		Settings["display"] = "term"
+		Settings["updateRate"] = 5
 	end
-	SetDisplay(settings["display"])
+	SetDisplay(Settings["display"])
 	while continue do
 		parallel.waitForAny(DisplayLoop, UserInterface)
 	end
