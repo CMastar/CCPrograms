@@ -9,15 +9,18 @@ local mon = term
 local InMenu = false
 local continue = true
 
-function AddDevice(deviceSide)
+function AddDevice(deviceSide, devName)
+	-- Add a device (given that the side is already specified
 	term.clear()
-	gooey.writeAt(1,1,"Enter a name for this " .. peripheral.call(deviceSide,"getName"))
-	print()
-	devName = read()
+	if devName == nil then
+		gooey.writeAt(1,1,"Enter a name for this " .. peripheral.call(deviceSide,"getName"))
+		print()
+		devName = read()
+	end
 	print(devName)
 	Devices[devName] = peripheral.wrap(deviceSide)
 	DeviceSides[devName] = deviceSide
-	--commonFunctions.saveData(Devices,"rotaryMonitors")
+	commonFunctions.saveData(DeviceSides,"rotaryMonitors")
 end
 
 function PickDevice()
@@ -26,7 +29,8 @@ function PickDevice()
 	for k,v in pairs(periphs) do
 		periphFound = peripheral.wrap(v)
 		if periphFound["getPower"] ~= nil then
-			table.insert(menuItems,{["func"] = AddDevice, ["text"] = periphFound.getName() .. " at " .. periphFound.getCoords(),["params"] = {v}})
+			x, y, z = periphFound.getCoords()
+			table.insert(menuItems,{["func"] = AddDevice, ["text"] = periphFound.getName() ..  " at " .. x .. "," .. y .. "," .. z,["params"] = {v}})
 		end
 	end
 	if term.isColor() then
@@ -50,8 +54,9 @@ function Display()
 	if not (menu == term and InMenu) then
 		if Devices ~= nil then
 			for name,rotaryItem in pairs(Devices) do
-				gooey.writeAt(1,items * linesNeeded + 1,name .. " a " .. rotaryItem.getName() .. " at " .. rotaryItem.getCoords())
-				power, speed, torque = rotaryItem.getPower()
+				x, y, z = rotaryItem.getCoords()
+				gooey.writeAt(1,items * linesNeeded + 1,name .. " a " .. rotaryItem.getName() .. " at " .. x .. "," .. y .. "," .. z)
+				power, torque, speed = rotaryItem.getPower()
 				gooey.writeAt(1,items * linesNeeded + 2,"Power: " .. power .. "W")
 				gooey.writeAt(1,items * linesNeeded + 3,"Speed: " .. speed .. "rpm")
 				gooey.writeAt(1,items * linesNeeded + 4,"Torque: " .. torque .. "Nm")
@@ -71,7 +76,10 @@ function UserInterface()
 		end
 		
 		InMenu = true
-		local menuItems = {{["text"] = "Add machine to monitor", ["func"] = PickDevice}}
+		local menuItems = {	{["text"] = "Add machine to monitor", ["func"] = PickDevice},
+							{["text"] = "Remove machine to monitor", ["func"] = RemoveDevices},
+							{["text"] = "Set display to use", ["func"] = SelectDisplay}
+							}
 		if term.isColor() then
 			gooey.clickMenu("Main Menu",menuItems)
 		else
@@ -85,9 +93,8 @@ function SelectDisplay()
 	monitors = commonFunctions.findAllPeripherals("monitor")
 	menuItems = {{["text"] = "Teminal screen", ["func"] = SetDisplay, ["params"] = {"term"}}}
 	for side, mon in pairs(monitors) do
-		table.insert(menuItems,{["text"] = side, ["func"] = SetDisplay, ["params"] = {side}}
+		table.insert(menuItems,{["text"] = side, ["func"] = SetDisplay, ["params"] = {side}})
 	end
-	if term.isColor() then
 	if term.isColor() then
 		gooey.clickMenu("Select display for monitors",menuItems)
 	else
@@ -99,14 +106,33 @@ function SetDisplay(displaySide)
 	if displaySide == "term" then
 		mon = term
 	else
-		mon = peripheral.wrap(displayside)
+		mon = peripheral.wrap(displaySide)
 	end
 	Settings["display"] = displaySide
 	commonFunctions.saveData(Settings,"RotMonSettings")
 end
 
-function RemoveDevice()
-	--to be implemented
+function RemoveDevices()
+	removeList = {} 
+	for devName, v in pairs(DeviceSides) do
+		table.insert(removeList,{["text"] = devName, ["func"] = RemoveDevice, ["params"] = {devName}})
+	end
+	table.insert(removeList,{["text"] = "Cancel", ["func"] = Cancel})
+	if term.isColor() then
+		gooey.clickMenu("Select device to stop monitoring",removeList)
+	else
+		commonFunctions.menu(removeList,"Select device to stop monitoring")
+	end
+end
+
+function RemoveDevice(devName)
+	Devices[devName] = nil
+	DeviceSides[devName] = nil
+	commonfunctions.saveData(DeviceSides,"RotaryMonitors")
+end
+
+function Cancel()
+	-- For menus where you don't want to do anything
 end
 
 function Main()
