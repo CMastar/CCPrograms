@@ -30,7 +30,7 @@ itemcount = turtle.getItemCount()
 			turtle.suckUp()
 			turtle.select(nextslot)
 		
-			if not slotfree then
+			if slotfree == false then
 				turtle.dropUp()
 				sleep(600)
 			else
