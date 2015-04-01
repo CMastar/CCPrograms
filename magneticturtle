@@ -17,12 +17,13 @@ while continue do
 		turtle.select(NextSlot())
 	end
 	turtle.suckUp() -- remove anything that might be above
+	itemName = turtle.getItemDetail().name
 	if  turtle.dropUp()  then-- hurrah, we've found an item. Try and stick it in the inventory above.
-		print("Placed" .. turtle.getItemDetail() .. " in slot " .. turtle.getSelectedSlot() .. " in storage above")
+		print("Placed" .. itemName.. " in slot " .. turtle.getSelectedSlot() .. " in storage above")
 		print("Waiting " .. updateRate .. " seconds")
 		sleep(updateRate)
 	else
-		print("Unable to place " .. turtle.getItemDetail() .. " in slot " .. turtle.getSelectedSlot() .. " in storage above")
+		print("Unable to place " .. itemName .. " in slot " .. turtle.getSelectedSlot() .. " in storage above")
 		turtle.select(NextSlot())
 		sleep(0.5)
 	end	
