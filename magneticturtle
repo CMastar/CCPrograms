@@ -10,14 +10,16 @@ itemcount = turtle.getItemCount()
 	
 	if nextslot is > 1 then
 		previousslot = nextslot-1
-	else
+		else
 		previousslot = 16
+		end
 	end
 	
 	if itemcount == 0 then
 		slotfree = true
-	else
+		else
 		slotfree = false
+		end
 	end
 	
 	continue = true
@@ -29,7 +31,8 @@ itemcount = turtle.getItemCount()
 			turtle.select(nextslot)
 			turtle.dropUp()
 			sleep(600)
-		else
+			else
 			turtle.select(nextslot)
+			end
 		end
 	end
