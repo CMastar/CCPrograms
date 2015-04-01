@@ -14,7 +14,17 @@ function SetOutput(OutputLevel)
 	if RealSide then
 		redstone.setAnalogOutput(SideToUse, tonumber(OutputLevel))
 	else
-		rednet.send(rednet.lookup("Redstone",SideToUse),{["Value"] = tonumber(OutputLevel),["Side"] = args[2]},"Redstone")
+		local targetAddress = rednet.lookup("Redstone",SideToUse)
+		if targetAddress == nil then
+			print("Unable to find target computer " .. SideToUse)
+			print("Retrying in 5 seconds")
+			targetAddress = rednet.lookup("Redstone",SideToUse)
+		end
+		if targetAddress ~= nil then
+			rednet.send(,{["Value"] = tonumber(OutputLevel),["Side"] = args[2]},"Redstone")
+		else
+			print("Unable to send to remote redstone computer")
+		end
 	end
 	commonFunctions.saveData({OutputLevel},"LastOutput")
 	sleep(2)
@@ -56,10 +66,10 @@ function main()
 		read()
 	end
 	
-	--lastOutput = commonFunctions.loadData("LastOutput")
-	--if lastOutput[1] ~= nil then
-	--	SetOutput(lastOutput[1])
-	--end
+	lastOutput = commonFunctions.loadData("LastOutput")
+	if lastOutput ~= nil then
+		SetOutput(lastOutput[1])
+	end
 	
 	while continue do
 		 menuItems = {}
