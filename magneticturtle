@@ -26,13 +26,15 @@ itemcount = turtle.getItemCount()
 	
 	while continue do
 	
-		if slotfree then
+		while slotfree do
 			turtle.suckUp()
 			turtle.select(nextslot)
-			turtle.dropUp()
-			sleep(600)
-		else
-			turtle.select(nextslot)
 		
+			if not slotfree then
+				turtle.dropUp()
+				sleep(600)
+			else
+				turtle.select(nextslot)
+			end
 		end
 	end
