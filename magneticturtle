@@ -8,7 +8,7 @@ itemcount = turtle.getItemCount()
 		nextslot=1
 	end
 	
-	if nextslot is > 1 then
+	if nextslot > 1 then
 		previousslot = nextslot-1
 		else
 		previousslot = 16
