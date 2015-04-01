@@ -14,9 +14,9 @@ end
 while continue do
 	print("Looking for a suitable item")
 	while turtle.getItemCount() <= 0 do
-		turtle.suckUp() -- remove anything that might be above
 		turtle.select(NextSlot())
 	end
+	turtle.suckUp() -- remove anything that might be above
 	if  turtle.dropUp()  then-- hurrah, we've found an item. Try and stick it in the inventory above.
 		print("Placed" .. turtle.getItemDetail() .. " in slot " .. turtle.getSelectedSlot() .. " in " .. turtle.inspectUp() .. " above")
 		print("Waiting " .. updateRate .. " seconds")
