@@ -1,7 +1,40 @@
-while true do
-	turtle.suckUp(1)
-	turtle.drop(1)
-	turtle.suck(1)
-	turtle.dropUp(1)
-	sleep(600)
-end
+
+currentslot = turtle.getSelectedSlot()
+itemcount = turtle.getItemCount()
+
+	if currentslot < 16 then
+		nextslot=currentslot+1
+	else
+		nextslot=1
+	end
+	
+	if nextslot > 1 then
+		previousslot = nextslot-1
+	else
+		previousslot = 16
+	
+	end
+	
+	if itemcount == 0 then
+		slotfree = true
+	else
+		slotfree = false
+	
+	end
+	
+	continue = true
+	
+	while continue do
+	
+		while slotfree do
+			turtle.suckUp()
+			turtle.select(nextslot)
+		
+			if slotfree == false then
+				turtle.dropUp()
+				sleep(600)
+			else
+				turtle.select(nextslot)
+			end
+		end
+	end
