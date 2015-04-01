@@ -21,7 +21,7 @@ function SetOutput(OutputLevel)
 			targetAddress = rednet.lookup("Redstone",SideToUse)
 		end
 		if targetAddress ~= nil then
-			rednet.send(,{["Value"] = tonumber(OutputLevel),["Side"] = args[2]},"Redstone")
+			rednet.send(targetAddress,{["Value"] = tonumber(OutputLevel),["Side"] = args[2]},"Redstone")
 		else
 			print("Unable to send to remote redstone computer")
 		end
