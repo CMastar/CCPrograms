@@ -1,40 +1,30 @@
 
-currentslot = turtle.getSelectedSlot()
-itemcount = turtle.getItemCount()
-
-	if currentslot < 16 then
-		nextslot=currentslot+1
+updateRate = 5
+	
+continue = true
+	
+function NextSlot()
+	if turtle.getSelectedSlot() < 16 then 
+		return turtle.getSelectedSlot() + 1
 	else
-		nextslot=1
+		return 1
 	end
+end
 	
-	if nextslot > 1 then
-		previousslot = nextslot-1
+while continue do
+	print("Looking for a suitable item")
+	while turtle.getItemCount() <= 0 do
+		turtle.suckUp() -- remove anything that might be above
+		turtle.select(NextSlot())
+	end
+	if  turtle.dropUp()  then-- hurrah, we've found an item. Try and stick it in the inventory above.
+		print("Placed" .. turtle.getItemDetail() .. " in slot " .. turtle.getSelectedSlot() .. " in " .. turtle.inspectUp() .. " above")
+		print("Waiting " .. updateRate .. " seconds")
+		sleep(updateRate)
 	else
-		previousslot = 16
+		print("Unable to place " .. turtle.getItemDetail() .. " in slot " .. turtle.getSelectedSlot() .. " in " .. turtle.inspectUp() .. " above")
+		turtle.select(NextSlot())
+		sleep(0.5)
+	end	
+end
 	
-	end
-	
-	if itemcount == 0 then
-		slotfree = true
-	else
-		slotfree = false
-	
-	end
-	
-	continue = true
-	
-	while continue do
-	
-		while slotfree do
-			turtle.suckUp()
-			turtle.select(nextslot)
-		
-			if slotfree == false then
-				turtle.dropUp()
-				sleep(600)
-			else
-				turtle.select(nextslot)
-			end
-		end
-	end
