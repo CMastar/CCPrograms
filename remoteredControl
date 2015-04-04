@@ -1,0 +1,49 @@
+os.loadAPI("commonFunctions")
+os.loadAPI("gooey")
+
+function RedstoneStatusMenu(target)
+	setMenu = {	{["text"] = "Get current status",["func"] = GetRedstone, ["params"] = {target}},
+				{["text"] = "Set simple status",["func"] = SetRedstone, ["params"] = {target,"siample"}},
+				{["text"] = "Set analog status",["func"] = SetRedstone, ["params"] = {target,"analog"}},
+				{["text"] = "Set bundled status",["func"] = SetRedstone, ["params"] = {target,"simple"}}}
+	if term.isColor() then
+		gooey.clickMenu("Select action to perform on " .. target,setMenu)
+	else
+		commonFunctions.menu(setMenu, "Select action to perform on " .. target)
+	end
+end
+
+function PickRemote() -- Find possible remote redstones, use them
+	pickMenu = {}
+	for i,id in pairs {rednet.lookup("Redstone")} do
+		idRx = id -1
+		redstone.send(id,"Identify","Command")
+		while id ~= idRx do
+			idRx, name = redstone.receive("Command")
+		end
+		table.insert(pickMenu,{["text"] =  name, ["func"]= RedstoneStatusMenu,["params"] = {id}})
+	end
+	table.insert(pickMenu,{["text"] = "Refresh list", ["func"] = Cancel})
+	commonFunctions.menu(pickMenu,"Select remote redstone to interact with")
+end
+
+function Cancel()
+	--Do nothing (for menu purposes)
+end
+
+function main()
+	for i,side in pairs(peripheral.getNames()) do
+		if peripheral.getType(side) == "modem" then
+			modemFound = true
+			rednet.open(side)
+		end
+	end
+	if not modemFound then
+		return "No modem found for contacting remote machine"
+	end
+	continue = true
+	while continue do
+		PickRemote()
+	end
+end
+

@@ -28,11 +28,28 @@ function Main()
 	rednet.host("Redstone",settings["HostName"])
 	Display()
 	while true do
-		id,message, protocol = rednet.receive("Redstone")
-		RSOutput(message)
-		Display(message)
+		id,message, protocol = rednet.receive()
+		if protocol == "Redstone" then
+			RSOutput(message)
+			Display(message)
+		elseif protocol == "Command" then
+			if message == "Identify" then
+				redstone.send(id, settings["HostName"],"Command")
+			elseif message == "Status"
+				SendStatus(id)
+			end
+		end
+			
 	end
 	return "Got to the end somehow. Odd"
+end
+
+function SendStatus(targetID)
+	statusTable =  {}
+	for k,side in pairs(rs.getSides()) do
+		statusTable[side] = rs.getAnalogOutput(side)
+	end
+	redstone.send(targetID,statusTable,"redstone")
 end
 
 function DefaultSideMenu()
