@@ -3,14 +3,61 @@ os.loadAPI("gooey")
 
 function RedstoneStatusMenu(target)
 	setMenu = {	{["text"] = "Get current status",["func"] = GetRedstone, ["params"] = {target}},
-				{["text"] = "Set simple status",["func"] = SetRedstone, ["params"] = {target,"siample"}},
+				{["text"] = "Set simple status",["func"] = SetRedstone, ["params"] = {target,"simple"}},
 				{["text"] = "Set analog status",["func"] = SetRedstone, ["params"] = {target,"analog"}},
-				{["text"] = "Set bundled status",["func"] = SetRedstone, ["params"] = {target,"simple"}}}
+				{["text"] = "Set bundled status",["func"] = SetRedstone, ["params"] = {target,"bundled"}},
+				{["text"] = "Cancel", ["func"] = Cancel}}
 	if term.isColor() then
 		gooey.clickMenu("Select action to perform on " .. target,setMenu)
 	else
 		commonFunctions.menu(setMenu, "Select action to perform on " .. target)
 	end
+end
+
+function GetRedstone(targetID)
+	redstone.send(targetID,"Status","Command")
+	idRx = targetID + 1
+	while idRx ~= targetID do
+		idRx, rsTable = redstone.receive("Redstone")
+	end
+	term.clear()
+	term.cursorPos(1,1)
+	print("Redstone status of computer " .. idRx)
+	for side, value in pairs(rsTable) do
+		print (side, .. " = " .. value)
+	end
+	print("Enter to return to main menu")
+	read()
+end
+
+function SetRedStone(targetID,redstoneType)
+	outputTable = {}
+	sideSelect = rs.getSides()
+	table.insert(sideSelect,"Default")
+	sideIndex = commonFunctions.menu(sideSelect,"Select Output Side")
+	if sideSelect[sideSideindex] ~=  "Default" then
+		outputTable.Side = sideSelect[sideSideindex]
+	end
+	if redstoneType == "simple"
+		simpleMenu = {"On","Off"}
+		result = commonFunctions.menu(simpleMenu,"Select Redstone Status")
+		if result = 1 then
+			outputTable.Value = true
+		else
+			outputTable.Value  = false
+		end
+	elseif redstoneType == "analog" then
+		term.clear()
+		term.setCursorPos(1,1)
+		print("Enter analog output value")
+		outputTable.Value = read()
+	elseif redstoneType == "bundled" then
+		term.clear()
+		term.setCursorPos(1,1)
+		print("Not yet implemented. Enter to continue")
+		read()
+	end
+	rednet.send(targetID,outputTable,"Redstone")
 end
 
 function PickRemote() -- Find possible remote redstones, use them
