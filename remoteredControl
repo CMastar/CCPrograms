@@ -66,11 +66,16 @@ function PickRemote() -- Find possible remote redstones, use them
 	for i,id in pairs {rednet.lookup("Redstone")} do
 		idRx = id -1
 		rednet.send(id,"Identify","Command")
-		while id ~= idRx do
-			idRx, name = rednet.receive("Command")
-		end
 		print("Waiting for response from computer" .. id)
-		table.insert(pickMenu,{["text"] =  name, ["func"]= RedstoneStatusMenu,["params"] = {id}})
+		while id ~= idRx and idRx ~= nil do
+			idRx, name = rednet.receive("Command",1)
+		end
+		if idRx ~= nil then
+			table.insert(pickMenu,{["text"] =  name, ["func"]= RedstoneStatusMenu,["params"] = {id}})
+		else
+			print ("No respone from " .. id)
+			table.insert(pickMenu,{["text"] =  "Uknown, ID = " ..id, ["func"]= RedstoneStatusMenu,["params"] = {id}})
+		end
 	end
 	table.insert(pickMenu,{["text"] = "Refresh list", ["func"] = Cancel})
 	commonFunctions.menu(pickMenu,"Select remote redstone to interact with")
