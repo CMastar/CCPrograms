@@ -34,7 +34,7 @@ function Main()
 			Display(message)
 		elseif protocol == "Command" then
 			if message == "Identify" then
-				redstone.send(id, settings["HostName"],"Command")
+				rednet.send(id, settings["HostName"],"Command")
 			elseif message == "Status" then
 				SendStatus(id)
 			end
