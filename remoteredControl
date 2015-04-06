@@ -62,12 +62,14 @@ end
 
 function PickRemote() -- Find possible remote redstones, use them
 	pickMenu = {}
+	print("Finding and identifying remote redstone clients")
 	for i,id in pairs {rednet.lookup("Redstone")} do
 		idRx = id -1
 		rednet.send(id,"Identify","Command")
 		while id ~= idRx do
 			idRx, name = rednet.receive("Command")
 		end
+		print("Waiting for response from computer" .. id)
 		table.insert(pickMenu,{["text"] =  name, ["func"]= RedstoneStatusMenu,["params"] = {id}})
 	end
 	table.insert(pickMenu,{["text"] = "Refresh list", ["func"] = Cancel})
@@ -79,10 +81,12 @@ function Cancel()
 end
 
 function main()
+	print("Finding modem")
 	for i,side in pairs(peripheral.getNames()) do
 		if peripheral.getType(side) == "modem" then
 			modemFound = true
 			rednet.open(side)
+			print("Found modem on " .. side)
 		end
 	end
 	if not modemFound then
