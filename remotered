@@ -39,6 +39,9 @@ function Main()
 				SendStatus(id)
 			end
 		end
+		if message ~= nil then
+			print("Last Message was: " .. textutils.serialize(message))
+		end
 	end
 	return "Got to the end somehow. Odd"
 end
@@ -85,9 +88,6 @@ function Display(message)
 		print (side .. ": " .. rs.getAnalogOutput(side))
 	end
 	print("Last updated at: " .. os.time())
-	if message ~= nil then
-		print("Last Message was: " .. textutils.serialize(message))
-	end
 end
 
 print(Main())
