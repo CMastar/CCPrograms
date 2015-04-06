@@ -35,11 +35,10 @@ function Main()
 		elseif protocol == "Command" then
 			if message == "Identify" then
 				redstone.send(id, settings["HostName"],"Command")
-			elseif message == "Status"
+			elseif message == "Status" then
 				SendStatus(id)
 			end
 		end
-			
 	end
 	return "Got to the end somehow. Odd"
 end
