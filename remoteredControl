@@ -18,12 +18,12 @@ function GetRedstone(targetID)
 	rednet.send(targetID,"Status","Command")
 	idRx = targetID + 1
 	while idRx ~= targetID do
-		print("Waiting for reposnse from computer " .. targetid)
+		print("Waiting for response from computer " .. targetID)
 		idRx, rsTable = rednet.receive("Redstone", 2)
 	end
 	if idRx ~= nil then
 		term.clear()
-		term.cursorPos(1,1)
+		term.setCursorPos(1,1)
 		print("Redstone status of computer " .. idRx)
 		for side, value in pairs(rsTable) do
 			print (side .. " = " .. value)
