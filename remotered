@@ -51,7 +51,7 @@ function SendStatus(targetID)
 	for k,side in pairs(rs.getSides()) do
 		statusTable[side] = rs.getAnalogOutput(side)
 	end
-	redstone.send(targetID,statusTable,"redstone")
+	rednet.send(targetID,statusTable,"Redstone")
 end
 
 function DefaultSideMenu()
