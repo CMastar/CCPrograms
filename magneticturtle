@@ -13,7 +13,7 @@ end
 	
 while continue do
 	turtle.suckUp() -- remove anything that might be above
-	NextSlot
+	NextSlot()
 	print("Looking for a suitable item")
 	while turtle.getItemCount() <= 0 do
 		turtle.select(NextSlot())
